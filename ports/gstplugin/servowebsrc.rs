@@ -83,8 +83,6 @@ use sparkle::gl;
 use sparkle::gl::types::GLuint;
 use sparkle::gl::Gl;
 
-use surfman::platform::default::connection::NativeConnection;
-use surfman::platform::default::context::NativeContext;
 use surfman::Connection;
 use surfman::Context;
 use surfman::ContextAttributeFlags;
@@ -107,6 +105,9 @@ use std::sync::Mutex;
 use std::thread;
 use std::time::Duration;
 use std::time::Instant;
+
+type NativeConnection = <Connection as ConnectionAPI>::NativeConnection;
+type NativeContext = <Device as DeviceAPI>::NativeContext;
 
 pub struct ServoWebSrc {
     sender: Sender<ServoWebSrcMsg>,
