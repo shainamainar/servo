@@ -28,6 +28,15 @@ use surfman_chains::SwapChain;
 
 use webrender_api::units::TexelRect;
 
+// TODO: surfman exports the NativeDevice type differently for different targets
+#[cfg(target_os = "linux")]
+type NativeDevice = surfman::platform::generic::multi::device::NativeDevice<
+    surfman::platform::unix::wayland::device::Device,
+    surfman::platform::unix::x11::device::Device,
+>;
+#[cfg(not(target_os = "linux"))]
+use surfman::platform::default::device::NativeDevice;
+
 type NativeContext = <Device as DeviceAPI>::NativeContext;
 
 /// This trait is used as a bridge between the different GL clients
@@ -298,6 +307,11 @@ impl WebrenderSurfman {
         let ref device = self.0.device.borrow();
         let ref context = self.0.context.borrow();
         device.native_context(context)
+    }
+
+    pub fn native_device(&self) -> NativeDevice {
+        let ref device = self.0.device.borrow();
+        device.native_device()
     }
 
     pub fn context_attributes(&self) -> ContextAttributes {

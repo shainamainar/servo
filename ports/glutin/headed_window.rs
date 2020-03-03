@@ -48,10 +48,10 @@ use surfman::SurfaceType;
 #[cfg(target_os = "windows")]
 use winapi;
 
-#[cfg(any(target_os = "windows", target_os = "linux"))]
-type NativeConnection = <Connection as ConnectionAPI>::NativeConnection;
-#[cfg(any(target_os = "windows", target_os = "linux"))]
-type NativeContext = <Device as DeviceAPI>::NativeContext;
+#[cfg(target_os = "linux")]
+type NativeConnection = <Connection as surfman::connection::Connection>::NativeConnection;
+#[cfg(target_os = "linux")]
+type NativeContext = <Device as surfman::device::Device>::NativeContext;
 
 #[cfg(target_os = "macos")]
 fn builder_with_platform_options(mut builder: winit::WindowBuilder) -> winit::WindowBuilder {
@@ -619,9 +619,10 @@ impl WindowMethods for Window {
 
         #[allow(unused_variables)]
         let native_connection = self.webrender_surfman.connection().native_connection();
+        let native_device = self.webrender_surfman.connection().native_device();
 
         #[cfg(target_os = "windows")]
-        return NativeDisplay::Egl(native_connection.0 as usize);
+        return NativeDisplay::Egl(native_device.egl_display as usize);
 
         #[cfg(target_os = "linux")]
         return match native_connection {
