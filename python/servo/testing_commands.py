@@ -450,9 +450,6 @@ class MachCommands(CommandBase):
         # running on a 2 CPU environment.
         os.environ['RAYON_RS_NUM_CPUS'] = "2"
 
-        # TODO: allow running WPT with a GPU
-        os.environ["LIBGL_ALWAYS_SOFTWARE"] = "1"
-
         os.environ["RUST_BACKTRACE"] = "1"
         kwargs["debug"] = not kwargs["release"]
         if kwargs.pop("rr_chaos"):
