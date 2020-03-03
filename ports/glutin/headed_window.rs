@@ -48,7 +48,9 @@ use surfman::SurfaceType;
 #[cfg(target_os = "windows")]
 use winapi;
 
+#[cfg(any(target_os = "windows", target_os = "linux"))]
 type NativeConnection = <Connection as ConnectionAPI>::NativeConnection;
+#[cfg(any(target_os = "windows", target_os = "linux"))]
 type NativeContext = <Device as DeviceAPI>::NativeContext;
 
 #[cfg(target_os = "macos")]
