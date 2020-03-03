@@ -35,8 +35,10 @@ use servo_media::player::context::{GlApi, GlContext as PlayerGLContext, NativeDi
 use std::cell::{Cell, RefCell};
 use std::mem;
 use std::rc::Rc;
-use surfman::connection::Connection as ConnectionAPI;
-use surfman::device::Device as DeviceAPI;
+#[cfg(target_os = "linux")]
+use surfman::platform::generic::multi::connection::NativeConnection;
+#[cfg(target_os = "linux")]
+use surfman::platform::generic::multi::context::NativeContext;
 use surfman::Connection;
 use surfman::ContextAttributes;
 use surfman::ContextAttributeFlags;
@@ -47,11 +49,6 @@ use surfman::NativeWidget;
 use surfman::SurfaceType;
 #[cfg(target_os = "windows")]
 use winapi;
-
-#[cfg(target_os = "linux")]
-type NativeConnection = <Connection as surfman::connection::Connection>::NativeConnection;
-#[cfg(target_os = "linux")]
-type NativeContext = <Device as surfman::device::Device>::NativeContext;
 
 #[cfg(target_os = "macos")]
 fn builder_with_platform_options(mut builder: winit::WindowBuilder) -> winit::WindowBuilder {
@@ -599,8 +596,11 @@ impl WindowMethods for Window {
 
         #[cfg(target_os = "linux")]
         return match native_context {
-            NativeContext::Default(native_context) => PlayerGLContext::Egl(native_context.egl_context as usize),
-            NativeContext::Alternate(native_context) => PlayerGLContext::Egl(native_context.egl_context as usize),
+            NativeContext::Default(NativeContext::Default(native_context)) =>
+                PlayerGLContext::Egl(native_context.egl_context as usize),
+            NativeContext::Default(NativeContext::Alternate(native_context)) =>
+                PlayerGLContext::Egl(native_context.egl_context as usize),
+            NativeContext::Alternate(_) => unimplemented!(),
         };
 
         // @TODO(victor): https://github.com/servo/media/pull/315
@@ -619,15 +619,19 @@ impl WindowMethods for Window {
 
         #[allow(unused_variables)]
         let native_connection = self.webrender_surfman.connection().native_connection();
-        let native_device = self.webrender_surfman.connection().native_device();
+        #[allow(unused_variables)]
+        let native_device = self.webrender_surfman.native_device();
 
         #[cfg(target_os = "windows")]
         return NativeDisplay::Egl(native_device.egl_display as usize);
 
         #[cfg(target_os = "linux")]
         return match native_connection {
-            NativeConnection::Default(conn) => NativeDisplay::Egl(conn.0 as usize),
-            NativeConnection::Alternate(conn) => NativeDisplay::Egl(conn.egl_display as usize),
+            NativeConnection::Default(NativeConnection::Default(conn)) =>
+                NativeDisplay::Egl(conn.0 as usize),
+            NativeConnection::Default(NativeConnection::Alternate(conn)) =>
+                NativeDisplay::X11(conn.x11_display as usize),
+            NativeConnection::Alternate(_) => unimplemented!(),
         };
 
         // @TODO(victor): https://github.com/servo/media/pull/315

@@ -11,13 +11,14 @@ use std::collections::HashMap;
 use std::ffi::c_void;
 use std::rc::Rc;
 use std::sync::{Arc, Mutex};
-use surfman::device::Device as DeviceAPI;
 use surfman::Adapter;
 use surfman::Connection;
 use surfman::Context;
 use surfman::ContextAttributes;
 use surfman::Device;
 use surfman::Error;
+use surfman::NativeContext;
+use surfman::NativeDevice;
 use surfman::NativeWidget;
 use surfman::Surface;
 use surfman::SurfaceAccess;
@@ -27,17 +28,6 @@ use surfman::SurfaceType;
 use surfman_chains::SwapChain;
 
 use webrender_api::units::TexelRect;
-
-// TODO: surfman exports the NativeDevice type differently for different targets
-#[cfg(target_os = "linux")]
-type NativeDevice = surfman::platform::generic::multi::device::NativeDevice<
-    surfman::platform::unix::wayland::device::Device,
-    surfman::platform::unix::x11::device::Device,
->;
-#[cfg(not(target_os = "linux"))]
-use surfman::platform::default::device::NativeDevice;
-
-type NativeContext = <Device as DeviceAPI>::NativeContext;
 
 /// This trait is used as a bridge between the different GL clients
 /// in Servo that handles WebRender ExternalImages and the WebRender
